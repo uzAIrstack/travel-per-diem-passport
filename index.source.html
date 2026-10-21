@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A simple multi-city federal per diem calculator prototype." />
+  <title>Per Diem Passport</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="skyline" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand-cluster">
+      <img class="kogod-logo" src="__KOGOD_LOGO_DATA__" alt="Kogod Operations" />
+      <a class="brand" href="#" aria-label="Per Diem Passport home">
+        <span class="brand-mark">↗</span>
+        <span>PER DIEM<br>PASSPORT</span>
+      </a>
+    </div>
+    <div class="source-pill"><span class="live-dot" id="sourceDot"></span> GSA FY27 DATA <strong id="sourceMode">ONBOARD</strong></div>
+    <div class="top-actions">
+      <button class="icon-button" id="resetBtn" type="button" aria-label="Reset trip">↻ RESET</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">TRAVEL PLANNING · MADE HUMAN</p>
+        <h1>BUILD THE TRIP.<br><span>KNOW THE NUMBER.</span></h1>
+      </div>
+      <p class="hero-copy">City by city, day by day. Lodging, meals, incidentals, and deductions—calculated in one clean route.</p>
+    </section>
+
+    <section class="trip-pass" aria-labelledby="passTitle">
+      <div class="pass-stub" aria-hidden="true">
+        <span class="pass-airmark">↗</span>
+        <strong>PER DIEM<br>PASSPORT</strong>
+        <span class="pass-code">PDP · FY27</span>
+      </div>
+      <div class="pass-body">
+        <div class="pass-heading">
+          <div>
+            <p class="kicker">TRAVEL AUTHORIZATION · BOARDING PASS</p>
+            <h2 id="passTitle">Trip at a glance</h2>
+          </div>
+          <span class="pass-ready">READY TO CALCULATE</span>
+        </div>
+        <div class="pass-fields">
+          <label class="pass-name">TRAVEL FOR
+            <input id="travelerName" type="text" autocomplete="name" maxlength="80" placeholder="ENTER TRAVELER NAME" aria-label="Traveler name" />
+          </label>
+          <label class="pass-home">HOME CITY
+            <input id="homeCity" type="text" maxlength="80" value="Washington, DC" aria-label="Home city" />
+          </label>
+          <div class="pass-field pass-destination"><span>TRAVEL TO</span><strong id="passDestination">WASHINGTON, DC → NEW YORK CITY, NY</strong></div>
+          <div class="pass-field pass-dates"><span>DATES</span><strong id="passDates">OCT 21 → OCT 25</strong></div>
+          <div class="pass-field pass-stops"><span>STOPS</span><strong id="passStops">02 CITIES</strong></div>
+        </div>
+      </div>
+      <div class="pass-tear" aria-hidden="true">
+        <span>BOARDING</span>
+        <div class="barcode"></div>
+        <strong id="passSerial">FY27 · 002</strong>
+      </div>
+    </section>
+
+    <section class="data-card" aria-labelledby="dataTitle">
+      <div class="data-heading">
+        <div>
+          <p class="kicker">OFFICIAL RATE SOURCE</p>
+          <h2 id="dataTitle">FY2027 data is built in</h2>
+        </div>
+        <span class="status-badge" id="apiStatus">OFFLINE READY</span>
+      </div>
+      <div class="offline-data-grid">
+        <div class="data-stat"><strong>40,426</strong><span>UNIQUE ZIP CODES</span></div>
+        <div class="data-stat"><strong>42,358</strong><span>ZIP RATE MAPPINGS</span></div>
+        <div class="data-stat"><strong>345</strong><span>GSA RATE AREAS</span></div>
+        <div class="dataset-actions" aria-label="Official GSA data downloads">
+          <a id="rateFileLink" href="https://www.gsa.gov/system/files/FY2027_PerDiemRates_Validated090126.xlsx" target="_blank" rel="noreferrer">↓ FY27 RATE FILE</a>
+          <a id="zipFileLink" href="https://www.gsa.gov/system/files/FY2027PerDiemZipCode_Validated090126.xlsx" target="_blank" rel="noreferrer">↓ FY27 ZIP FILE</a>
+          <a href="https://www.gsa.gov/travel/plan-a-trip/per-diem-rates/per-diem-files" target="_blank" rel="noreferrer">SOURCE PAGE ↗</a>
+        </div>
+      </div>
+      <p class="connection-note" id="connectionNote">Search every ZIP in the official FY27 file or any GSA-named destination. For a city GSA does not name, use its ZIP to apply the exact locality or standard CONUS rate.</p>
+    </section>
+
+    <section class="route-card" aria-labelledby="routeTitle">
+      <div class="section-heading">
+        <div>
+          <span class="step-number">01</span>
+          <div>
+            <p class="kicker">YOUR ROUTE</p>
+            <h2 id="routeTitle">Where are you going?</h2>
+          </div>
+        </div>
+        <div class="date-stamp" id="dateStamp">JUN 08 → JUN 12</div>
+      </div>
+
+      <div class="route-track" id="routeTrack"></div>
+
+      <fieldset class="scope-selector">
+        <legend>WHAT SHOULD THIS TRIP INCLUDE?</legend>
+        <label class="scope-option">
+          <input type="radio" name="scope" value="both" checked />
+          <span><strong>BOTH</strong><small>LODGING + M&IE</small></span>
+        </label>
+        <label class="scope-option">
+          <input type="radio" name="scope" value="lodging" />
+          <span><strong>LODGING ONLY</strong><small>ROOM RATE</small></span>
+        </label>
+        <label class="scope-option">
+          <input type="radio" name="scope" value="mie" />
+          <span><strong>M&IE ONLY</strong><small>MEALS + INCIDENTALS</small></span>
+        </label>
+      </fieldset>
+
+      <form class="add-stop-form" id="addStopForm" hidden>
+        <label class="destination-field">
+          DESTINATION · CITY, ST OR 5-DIGIT ZIP
+          <span class="lookup-control">
+            <input id="locationQuery" type="search" placeholder="Boston, MA or 02108" autocomplete="off" required />
+            <button id="lookupBtn" type="button">SEARCH FY27</button>
+          </span>
+          <span class="lookup-result" id="lookupResult" aria-live="polite">Search a location to select its rate.</span>
+        </label>
+        <label>
+          ARRIVE
+          <input type="date" id="newStart" required />
+        </label>
+        <label>
+          LEAVE
+          <input type="date" id="newEnd" required />
+        </label>
+        <button class="black-button" id="addRouteBtn" type="submit" disabled>ADD TO ROUTE →</button>
+      </form>
+    </section>
+
+    <div class="workspace">
+      <section class="ledger-card" aria-labelledby="ledgerTitle">
+        <div class="section-heading compact">
+          <div>
+            <span class="step-number coral">02</span>
+            <div>
+              <p class="kicker">DAILY LEDGER</p>
+              <h2 id="ledgerTitle">Fine-tune each day</h2>
+            </div>
+          </div>
+          <div class="legend"><span class="meal-mini active"></span> PROVIDED MEAL <span class="personal-mini">P</span> PERSONAL</div>
+        </div>
+        <p class="ledger-intro">Tap a meal when it was provided by another source, such as the university, a visiting organization, or your host. Use P to mark a personal day and set that date’s claim to $0.</p>
+        <div class="day-list" id="dayList"></div>
+      </section>
+
+      <aside class="summary-card" aria-labelledby="summaryTitle">
+        <div class="summary-top">
+          <p class="kicker">TRIP TOTAL</p>
+          <span id="tripDays">5 DAYS</span>
+        </div>
+        <h2 id="summaryTitle" class="grand-total">$0.00</h2>
+        <div class="total-line"><span>LODGING</span><strong id="lodgingTotal">$0.00</strong></div>
+        <div class="total-line"><span>MEALS & INCIDENTALS</span><strong id="mieTotal">$0.00</strong></div>
+        <div class="total-line deduction"><span>MEAL DEDUCTIONS</span><strong id="deductionTotal">−$0.00</strong></div>
+        <div class="math-strip"><span>GSA RATE</span><span>×</span><span>DAYS</span><span>−</span><span>MEALS</span></div>
+        <div class="export-actions" aria-label="Export trip summary">
+          <button class="export-button" id="exportPdfBtn" type="button">PDF <span>↓</span></button>
+          <button class="export-button secondary" id="exportCsvBtn" type="button">CSV <span>↓</span></button>
+        </div>
+        <p class="summary-note">First and last travel days use 75% of M&IE. Lodging remains at the applicable nightly maximum.</p>
+        <a class="source-link" href="https://www.gsa.gov/travel/plan-a-trip/per-diem-rates/per-diem-files" target="_blank" rel="noreferrer">VIEW OFFICIAL GSA FILES ↗</a>
+      </aside>
+    </div>
+
+    <section class="how-card">
+      <p class="kicker">WHAT THE FINAL PRODUCT CONNECTS</p>
+      <div class="how-grid">
+        <div><span>①</span><strong>CHOOSE ROUTE</strong><p>Add as many U.S. cities and date ranges as the trip needs.</p></div>
+        <div><span>②</span><strong>SEARCH GSA DATA</strong><p>Use the official FY2027 rate and ZIP files built directly into this calculator.</p></div>
+        <div><span>③</span><strong>ADJUST EACH DAY</strong><p>Deduct a provided meal or exclude a personal day on the exact date.</p></div>
+        <div><span>④</span><strong>EXPORT TOTAL</strong><p>See lodging and M&IE separately, then save a voucher-ready summary.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>DEVELOPMENT BUILD · CONUS ONLY</span>
+    <span>SELF-CONTAINED HTML · GSA FY2027 ONBOARD</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="fy2027-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
